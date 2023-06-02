@@ -102,4 +102,4 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 client = MyClient(intents=intents)
-client.run('MTEwNjgwNDg0NzU2MDM2NDA3Mw.GnljL4.7r6Gl8R5eAXuO12jmgVHKolpEWW0zy7u67UPwg')
+client.run('MASUKKAN TOKEN')
