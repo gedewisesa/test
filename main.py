@@ -1,105 +1,36 @@
-# This example requires the 'message_content' privileged intent to function.
-
+from settings import settings
 import discord
-import random
-import asyncio
+# import * - adalah cara cepat untuk mengimpor semua file di perpustakaan
+from bot_logic import *
 
-
-class MyClient(discord.Client):
-    async def on_ready(self):
-        print(f'Logged in as {self.user} (ID: {self.user.id})')
-        print('------')
-
-    async def on_message(self, message):
-        # we do not want the bot to reply to itself
-        if message.author.id == self.user.id:
-            return
-
-        if message.content.startswith('$hello'):
-            await message.channel.send('Halo! Saya bot penghitung.')
-
-        if message.content.startswith('$guess'):
-            await message.channel.send('Tebak angka berapapun antara 1 dan 10.')
-
-            def is_correct(m):
-                return m.author == message.author and m.content.isdigit()
-
-            answer = random.randint(1, 10)
-
-            try:
-                guess = await self.wait_for('message', check=is_correct, timeout=5.0)
-            except asyncio.TimeoutError:
-                return await message.channel.send(f'Maaf, kamu terlalu lama {answer}.')
-
-            if int(guess.content) == answer:
-                await message.channel.send('Kamu benar!')
-            else:
-                await message.channel.send(f'Waduh, yang benar adalah {answer}.')
-
-        if message.content.startswith('$pass'):
-            def gen_pass(pass_length):
-                elements = "+-/*!&$#?=@<>"
-                password = ""
-
-                for i in range(pass_length):    
-                    password += random.choice(elements)
-
-                return password
-
-            await message.channel.send(gen_pass(10)) 
-
-        if message.content.startswith('$luaspersegi'):
-            await message.channel.send("input panjang sisi: ")
-            def is_correct(m):
-                return m.author == message.author and m.content.isdigit()
-            try:
-                guess = await self.wait_for('message', check=is_correct, timeout=5.0)
-            except asyncio.TimeoutError:
-                return await message.channel.send(f'Maaf, kamu terlalu lama {answer}.')
-            answer = int(guess.content) * int(guess.content)
-
-            await message.channel.send(answer)
-
-        if message.content.startswith('$luassegitiga'):
-            def is_correct(m):
-                return m.author == message.author and m.content.isdigit()
-
-            await message.channel.send("input alas: ")
-            
-            try:
-                guess = await self.wait_for('message', check=is_correct, timeout=5.0)
-            except asyncio.TimeoutError:
-                return await message.channel.send(f'Maaf, kamu terlalu lama {answer}.')
-            
-            alas = int(guess.content)    
-
-            await message.channel.send("input tinggi: ")
-
-            try:
-                guess = await self.wait_for('message', check=is_correct, timeout=5.0)
-            except asyncio.TimeoutError:
-                return await message.channel.send(f'Maaf, kamu terlalu lama {answer}.')
-
-            tinggi = int(guess.content)  
-            
-            answer = 0.5 * int(alas) * int(tinggi)
-
-            await message.channel.send(answer)
-
-        if message.content.startswith('$luaslingkaran'):
-            await message.channel.send("input panjang jari-jari: ")
-            def is_correct(m):
-                return m.author == message.author and m.content.isdigit()
-            try:
-                guess = await self.wait_for('message', check=is_correct, timeout=5.0)
-            except asyncio.TimeoutError:
-                return await message.channel.send(f'Maaf, kamu terlalu lama {answer}.')
-            answer = 3.14 * int(guess.content) * int(guess.content)
-
-            await message.channel.send(answer)
-
+# Variabel intents menyimpan hak istimewa bot
 intents = discord.Intents.default()
+# Mengaktifkan hak istimewa message-reading
 intents.message_content = True
+# Membuat bot di variabel klien dan memindahkan hak istimewa
+client = discord.Client(intents=intents)
 
-client = MyClient(intents=intents)
-client.run('MASUKKAN TOKEN')
+
+# Setelah bot siap, ia akan mencetak namanya!
+@client.event
+async def on_ready():
+    print(f'We have logged in as {client.user}')
+
+
+# Saat bot menerima pesan, bot akan mengirimkan pesan di saluran yang sama!
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+    if message.content.startswith('$hello'):
+        await message.channel.send('Saya! Saya bot!')
+    elif message.content.startswith('$smile'):
+        await message.channel.send(gen_emodji())
+    elif message.content.startswith('$coin'):
+        await message.channel.send(flip_coin())
+    elif message.content.startswith('$pass'):
+        await message.channel.send(gen_pass(10))
+    else:
+        await message.channel.send("Tidak dapat memproses perintah ini, maaf")
+
+client.run(settings["TOKEN"])
