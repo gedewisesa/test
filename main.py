@@ -1,36 +1,61 @@
-from settings import settings
 import discord
-# import * - adalah cara cepat untuk mengimpor semua file di perpustakaan
-from bot_logic import *
+from discord.ext import commands
+import os
+import random
+import requests
 
-# Variabel intents menyimpan hak istimewa bot
 intents = discord.Intents.default()
-# Mengaktifkan hak istimewa message-reading
 intents.message_content = True
-# Membuat bot di variabel klien dan memindahkan hak istimewa
-client = discord.Client(intents=intents)
+
+bot = commands.Bot(command_prefix='$', intents=intents)
+
+# Dan inilah cara Kamu mengganti nama file dari variabel!
 
 
-# Setelah bot siap, ia akan mencetak namanya!
-@client.event
+@bot.event
 async def on_ready():
-    print(f'We have logged in as {client.user}')
+    print(f'We have logged in as {bot.user}')
 
+@bot.command()
+async def hello(ctx):
+    await ctx.send(f'Hi! I am a bot {bot.user}!')
 
-# Saat bot menerima pesan, bot akan mengirimkan pesan di saluran yang sama!
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
-    if message.content.startswith('$hello'):
-        await message.channel.send('Saya! Saya bot!')
-    elif message.content.startswith('$smile'):
-        await message.channel.send(gen_emodji())
-    elif message.content.startswith('$coin'):
-        await message.channel.send(flip_coin())
-    elif message.content.startswith('$pass'):
-        await message.channel.send(gen_pass(10))
+organik = ["daun", "kulit_pisang", "apel_busuk"]
+anorganik = ["plastik", "kaleng", "botol_plastik"]
+
+@bot.command()
+async def pilih(ctx, sampah):
+    if sampah in organik:
+         await ctx.send('masuk ke dalam sampah organik')
     else:
-        await message.channel.send("Tidak dapat memproses perintah ini, maaf")
+         await ctx.send('masuk ke dalam sampah anorganik')
 
-client.run(settings["TOKEN"])
+@bot.command()
+async def heh(ctx, count_heh = 5):
+    await ctx.send("he" * count_heh)
+
+@bot.command()
+async def mem(ctx):
+    img_name = random.choice(os.listdir('images'))
+    with open(f'images/{img_name}', 'rb') as f:
+                    picture = discord.File(f)
+    # with open('images/meme1.jpg', 'rb') as f:
+    #     # Mari simpan file perpustakaan/library Discord yang dikonversi dalam variabel ini!
+    #     picture = discord.File(f)
+   # Kita kemudian dapat mengirim file ini sebagai tolok ukur!
+    await ctx.send(file=picture)
+
+def get_duck_image_url():    
+    url = 'https://random-d.uk/api/random'
+    res = requests.get(url)
+    data = res.json()
+    return data['url']
+
+
+@bot.command('duck')
+async def duck(ctx):
+    '''Setelah kita memanggil perintah bebek (duck), program akan memanggil fungsi get_duck_image_url'''
+    image_url = get_duck_image_url()
+    await ctx.send(image_url)
+
+bot.run("MASUKKAN TOKEN")
